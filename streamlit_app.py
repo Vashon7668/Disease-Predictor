@@ -1,65 +1,58 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+import streamlit as st
+import pandas as pd
 import joblib
 import numpy as np
-import pandas as pd
 
-app = Flask(__name__)
-CORS(app)  
-
+# Load model and encoder
 model = joblib.load("disease_prediction_model.pkl")
 label_encoder = joblib.load("label_encoder.joblib")
-df = pd.read_csv(r"C:\Users\Harikar\LSM_Project\cleaned_balanced_dataset.csv")
+df = pd.read_csv("cleaned_balanced_dataset.csv")
 
-token_counter = 0
-average_consultation_time = 10
+st.title("🩺 Disease Prediction App")
 
-@app.route("/predict", methods=["POST"])
-def predict():
-    global token_counter
-    data = request.json
+# Input form
+with st.form("health_form"):
+    st.subheader("Enter Patient Details")
+    fever = st.radio("Fever", ["Yes", "No"])
+    cough = st.radio("Cough", ["Yes", "No"])
+    fatigue = st.radio("Fatigue", ["Yes", "No"])
+    breathing = st.radio("Difficulty Breathing", ["Yes", "No"])
+    age = st.number_input("Age", min_value=1, max_value=120, value=25)
+    gender = st.selectbox("Gender", ["Male", "Female"])
+    bp = st.selectbox("Blood Pressure", ["Normal", "High", "Low"])
+    cholesterol = st.selectbox("Cholesterol Level", ["Normal", "High", "Low"])
 
-    try:
-        features = [
-            int(data["fever"]),
-            int(data["cough"]),
-            int(data["fatigue"]),
-            int(data["breathing"]),
-            int(data["age"]),
-            int(data["gender"]),
-            int(data["blood_pressure"]),
-            int(data["cholesterol"]),
-            1  # dummy or default value
-        ]
+    submitted = st.form_submit_button("Predict")
 
-        if len(features) != 9:
-            return jsonify({"error": "Expected 9 features"}), 400
+if submitted:
+    # Mapping inputs
+    yesno_map = {"Yes": 1, "No": 0}
+    gender_map = {"Male": 1, "Female": 0}
+    bp_map = {"Normal": 0, "High": 1, "Low": 2}
+    chol_map = {"Normal": 0, "High": 1, "Low": 2}
 
-        disease_label = model.predict([features])[0]
-        disease_name = label_encoder.inverse_transform([disease_label])[0]
-        matching_rows = df[df["Disease"] == disease_label]
+    features = [
+        yesno_map[fever],
+        yesno_map[cough],
+        yesno_map[fatigue],
+        yesno_map[breathing],
+        age,
+        gender_map[gender],
+        bp_map[bp],
+        chol_map[cholesterol],
+        1  # Placeholder for missing feature
+    ]
 
-        if matching_rows.empty:
-            return jsonify({"error": "Disease not found in dataset"}), 404
+    # Make prediction
+    label = model.predict([features])[0]
+    disease = label_encoder.inverse_transform([label])[0]
 
-        outcome = matching_rows["Outcome Variable"].values[0]
-        advice = f"{disease_name} ({'Consult a doctor' if outcome == 1 else 'No immediate consultation needed'})"
-
-        token_counter += 1
-        estimated_wait_time = token_counter * average_consultation_time
-
-        return jsonify({
-            "result": advice,
-            "token": f"#{token_counter}",
-            "wait_time": f"~{estimated_wait_time} minutes"
-        })
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route("/", methods=["GET"])
-def home():
-    return jsonify({"message": "Welcome to the Disease Prediction API"})
-
-if __name__ == "__main__":
-    app.run(debug=False, port=5001)
+    # Determine consultation advice
+    match = df[df["Disease"] == label]
+    if not match.empty:
+        outcome = match["Outcome Variable"].values[0]
+        advice = f"🧾 Prediction: {disease} — "
+        advice += "Consult a doctor." if outcome == 1 else "No immediate consultation needed."
+        st.success(advice)
+    else:
+        st.error("Disease not found in reference dataset.")
