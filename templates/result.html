@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnosis Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 50%;
+            margin: 50px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h2 {
+            color: #004080;
+            margin-bottom: 20px;
+        }
+
+        .diagnosis {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #333;
+            background: #e6f7ff;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 5px solid #004080;
+            text-align: left;
+        }
+
+        .token {
+            font-size: 22px;
+            font-weight: bold;
+            color: #d9534f;
+            margin-top: 20px;
+        }
+
+        .waiting-time {
+            font-size: 18px;
+            color: #5cb85c;
+            margin-top: 10px;
+        }
+
+        .qr-code {
+            margin-top: 20px;
+        }
+
+        .qr-code img {
+            width: 150px;
+            height: 150px;
+            border: 5px solid #004080;
+            border-radius: 8px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Diagnosis Result</h2>
+        <p class="diagnosis"><strong>Patient Diagnosis Outcome:</strong> {{ result | safe }}</p>
+        <p class="token">Your Consultation Token: <span>{{ token }}</span></p>
+        <p class="waiting-time">Estimated Waiting Time: <strong>{{ wait_time }}</strong></p>
+
+        <!-- QR Code for Consultation Token -->
+        <div class="qr-code">
+            <p>Scan the QR code to verify your token:</p>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ token | urlencode }}" alt="QR Code">
+        </div>
+
+        <div class="footer">
+            <p>Please consult a medical professional if symptoms persist.</p>
+        </div>
+    </div>
+
+</body>
+</html>
