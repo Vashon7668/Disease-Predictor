@@ -90,4 +90,4 @@ def home():
     return jsonify({"message": "Welcome to the Disease Prediction API"})
 
 if __name__ == "__main__":
-    app.run(debug=False, port=5001)
+    app.run(debug=False, port=5006)
