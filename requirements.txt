@@ -1,5 +1,9 @@
 streamlit
-pandas
+flask
+flask-cors
 scikit-learn
+pandas
 numpy
+qrcode[pil]
+fpdf
 joblib
