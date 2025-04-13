@@ -89,6 +89,7 @@ if submitted:
         - **Camp:** {camp}  
         - **Address:** {address}  
         - **Token Number:** {token_number}
+        - **Estimated Wait Time:** ~{estimated_wait_time} minutes
         """)
 
         # QR code content
