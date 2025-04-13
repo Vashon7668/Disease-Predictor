@@ -24,7 +24,7 @@ assignments = [
 
 # Session-state token counter
 if "token_number" not in st.session_state:
-    st.session_state.token_number = 1000  # Start from token #1000
+    st.session_state.token_number = 0  # Start from 0 so first token becomes #1
 
 st.title("🩺 Disease Prediction App")
 
@@ -76,9 +76,11 @@ if submitted:
         camp = assignment["camp"]
         address = assignment["address"]
 
-        # Token number (increment per user)
+        # Token number and estimated wait time
         st.session_state.token_number += 1
         token_number = f"#{st.session_state.token_number}"
+        average_consult_time = 10  # in minutes
+        estimated_wait_time = st.session_state.token_number * average_consult_time
 
         # Display result
         st.markdown(f"""
@@ -88,7 +90,7 @@ if submitted:
         - **Hospital:** {hospital}  
         - **Camp:** {camp}  
         - **Address:** {address}  
-        - **Token Number:** {token_number}
+        - **Token Number:** {token_number}  
         - **Estimated Wait Time:** ~{estimated_wait_time} minutes
         """)
 
@@ -96,7 +98,7 @@ if submitted:
         qr_text = f"Disease: {disease}\nAdvice: {advice}\nToken: {token_number}\nHospital: {hospital}\nCamp: {camp}\nAddress: {address}"
         qr_img = qrcode.make(qr_text)
 
-        # Show QR code (fix streamlit error)
+        # Show QR code
         qr_buf_display = BytesIO()
         qr_img.save(qr_buf_display, format="PNG")
         qr_buf_display.seek(0)
