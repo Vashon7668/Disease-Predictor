@@ -22,6 +22,10 @@ assignments = [
     {"hospital": "Manipal Hospitals", "camp": "Urban Clinic Camp E", "address": "Old Airport Road, Bangalore"}
 ]
 
+# Session-state token counter
+if "token_number" not in st.session_state:
+    st.session_state.token_number = 1000  # Start from token #1000
+
 st.title("🩺 Disease Prediction App")
 
 # Input form
@@ -71,7 +75,10 @@ if submitted:
         hospital = assignment["hospital"]
         camp = assignment["camp"]
         address = assignment["address"]
-        token_number = f"#{random.randint(1000, 9999)}"
+
+        # Token number (increment per user)
+        st.session_state.token_number += 1
+        token_number = f"#{st.session_state.token_number}"
 
         # Display result
         st.markdown(f"""
@@ -84,15 +91,20 @@ if submitted:
         - **Token Number:** {token_number}
         """)
 
-        # Generate QR code
+        # QR code content
         qr_text = f"Disease: {disease}\nAdvice: {advice}\nToken: {token_number}\nHospital: {hospital}\nCamp: {camp}\nAddress: {address}"
         qr_img = qrcode.make(qr_text)
-        st.image(qr_img, caption="Scan QR Code for Details", use_column_width=True)
+
+        # Show QR code (fix streamlit error)
+        qr_buf_display = BytesIO()
+        qr_img.save(qr_buf_display, format="PNG")
+        qr_buf_display.seek(0)
+        st.image(qr_buf_display, caption="Scan QR Code for Details", use_container_width=True)
 
         # QR download
-        qr_buf = BytesIO()
-        qr_img.save(qr_buf, format="PNG")
-        st.download_button("📥 Download QR Code", data=qr_buf.getvalue(), file_name="qr_code.png", mime="image/png")
+        qr_buf_download = BytesIO()
+        qr_img.save(qr_buf_download, format="PNG")
+        st.download_button("📥 Download QR Code", data=qr_buf_download.getvalue(), file_name="qr_code.png", mime="image/png")
 
         # PDF generation
         pdf = FPDF()
