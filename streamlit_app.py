@@ -111,8 +111,7 @@ if submitted:
         pdf.add_page()
         pdf.set_font("Arial", size=12)
         pdf.multi_cell(0, 10, txt=qr_text)
-        pdf_output = BytesIO()
-        pdf.output(pdf_output)
-        st.download_button("📄 Download Report PDF", data=pdf_output.getvalue(), file_name="prediction_report.pdf", mime="application/pdf")
+        pdf_output = pdf.output(dest="S").encode("latin1")
+        st.download_button("📄 Download Report PDF", data=pdf_output, file_name="prediction_report.pdf", mime="application/pdf")
     else:
         st.error("Disease not found in reference dataset.")
